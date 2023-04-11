@@ -17,11 +17,17 @@ In order to make changes and test them you might want to create a "develop" cont
 
 ## Building develop container
 ```bash
-make all
+make create-data-image
 ```
+
+## Make data image
+```bash
+make create-data-image
+```
+
 ## Share by pushing to container registry
 ```bash
-make push
+ make push-to-dockerhub VERSION=<VERSION>
 ```
 
 ## Using develop container from container registry
@@ -29,10 +35,21 @@ make push
 make pull
 ```
 
+### Make readonly container for production
+```bash
+make create-data-image VERSION=<version>
+```
+
 ## Running Bash inside container
 ```bash
 make bash
 ```
 
+## Run data container
+```bash
+make run
+```
 
+### Making Queries
 
+Either go to Localhost:7474 and browse using the UI or use the bolt port within an application

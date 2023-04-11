@@ -22,8 +22,8 @@ create-data-image: create-graphdb-env-image
 	docker build -t ${REG}/graphdb:${VERSION} -f ./Dockerfile_add_data .
 	docker tag ${REG}/graphdb:${VERSION} ${REG}/graphdb:latest
 
-create-readonly-image: create-data-image
-	docker build -t ${REG}/graphdb_readonly:latest -f ./Dockerfile_readonly .
+create-readonly-image:
+	docker build -t ${REG}/graphdb_readonly:${VERSION} -f ./Dockerfile_readonly .
 
 push-to-dockerhub: registry-docker-login
 	docker push ${REG}/graphdb:${VERSION}
