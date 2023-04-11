@@ -1,4 +1,4 @@
-# AGR Loader Environment Documentation
+# Reactome Data Image Generation Documentation
 
 This repository does not follow the standard AGR branching strategy, but instead adopts a NEO4j release based branching as `neo-x.y`.
 In doing so, it supports an automatic stable GoCD build from such NEO4j versioned branch(es) for use in the staging (and production) environments, while enabling testing of new NEO4j versions on the build environment (on other branches). Any updates within a neo4j release should be done on the matching `neo-x.y` branch, and then merged into master.
@@ -9,7 +9,7 @@ After a version has been created, the user should create a tagged docker contain
 make all VERSION=<version>
 make push VERSION=<version>
 ```
-This will make it so that there is a agr_neo4j_env container available via ECR (by default). If you would like to use this version feel free to specify the version in the agr_neo4j's Dockerfile. The agr_loader Dockerfile should specify a specific version when pushing code to develop. This way we will know exactly what is running in dev, staging and production environments.  
+This will make it so that there is a graphdb_env container available via ECR (by default). If you would like to use this version feel free to specify the version in the add_data's Dockerfile or just use latest.   
 
 In order to make changes and test them you might want to create a "develop" container. To do this you can use commands available in the Makefile:
 
