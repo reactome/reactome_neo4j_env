@@ -1,0 +1,8 @@
+FROM reactome/graphdb_env:latest
+
+RUN rm data
+RUN mkdir -p data/databases/graph.db
+RUN chown -R neo4j.neo4j data
+
+COPY reactome.graphdb.dump .
+RUN bin/neo4j-admin load --from=reactome.graphdb.dump --database=graph.db

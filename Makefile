@@ -1,4 +1,4 @@
-REG := 100225593120.dkr.ecr.us-east-1.amazonaws.com
+REG := reactome
 VERSION := latest
 
 registry-docker-login:
@@ -11,17 +11,30 @@ endif
 	${DOCKER_LOGIN_CMD}
 endif
 
-all:
-	docker build -t ${REG}/agr_neo4j_env:${VERSION} .
+download-database-dump-file:
+	curl -o "reactome.graphdb.dump" https://reactome.org/download/current/reactome.graphdb.dump
 
-push: registry-docker-login
-	docker push ${REG}/agr_neo4j_env:${VERSION}
+create-graphdb-env-image:
+	docker build -t ${REG}/graphdb_env:${VERSION} .
+	docker tag ${REG}/graphdb_env:${VERSION} ${REG}/graphdb_env:latest
+
+create-data-image: create-graphdb-env-image
+	docker build -t ${REG}/graphdb:${VERSION} -f ./Dockerfile_add_data .
+	docker tag ${REG}/graphdb:${VERSION} ${REG}/graphdb:latest
+
+create-readonly-image: create-data-image
+	docker build -t ${REG}/graphdb_readonly:latest -f ./Dockerfile_readonly .
+
+push-to-dockerhub: registry-docker-login
+	docker push ${REG}/graphdb:${VERSION}
+	docker push ${REG}/graphdb:latest
+
 
 pull: registry-docker-login
-	docker pull ${REG}/agr_neo4j_env:${VERSION}
+	docker pull ${REG}/graphdb:${VERSION}
 
 bash:
-	docker run -t -i ${REG}/agr_neo4j_env:${VERSION} bash
+	docker run -t -i ${REG}/graphdb:${VERSION} bash
 
 run:
-	docker run -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/agr_neo4j_env:${VERSION}
+	docker run -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/graphdb:${VERSION}
