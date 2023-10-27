@@ -1,5 +1,5 @@
 REG := reactome
-VERSION := latest
+VERSION := Release86
 
 registry-docker-login:
 ifneq ($(shell echo ${REG} | egrep "ecr\..+\.amazonaws\.com"),)
@@ -37,4 +37,4 @@ bash:
 	docker run -t -i ${REG}/graphdb:${VERSION} bash
 
 run:
-	docker run -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/graphdb:${VERSION}
+	docker run -p 7475:7474 -p 7688:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/graphdb:${VERSION}
