@@ -76,3 +76,31 @@ The artifact captures:
 - `dbms.components()` — Neo4j version metadata
 
 Commit the generated JSON alongside the release. `reactome-mcp` vendors a copy; refresh it there too when the schema changes.
+
+### Ship the schema inside the data image
+
+Once the JSON is in `schemas/`, layer it onto an existing data image so curators can pull it out directly from the container:
+
+```bash
+make add-schema-to-image VERSION=<release>
+# builds reactome/graphdb:<release>-schema (thin layer on top of
+# public.ecr.aws/reactome/graphdb:<release> — no 4 GB rebuild)
+```
+
+Run it and the schema is readable at `/reactome-schema.json`:
+
+```bash
+docker run -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_memory_heap_maxSize=8g \
+  reactome/graphdb:<release>-schema
+
+docker exec <container> cat /reactome-schema.json
+# or copy it to the host:
+docker cp <container>:/reactome-schema.json ./schema.json
+```
+
+Image labels expose the path and version for automated tooling:
+
+- `org.reactome.schema.path=/reactome-schema.json`
+- `org.reactome.schema.version=<release>`
+
+To layer onto a locally-built image instead of the public ECR tag, pass `SCHEMA_BASE=reactome/graphdb`.

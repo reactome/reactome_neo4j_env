@@ -52,3 +52,26 @@ run:
 HTTP_BASE ?= http://localhost:7474
 extract-schema:
 	bin/extract-schema.sh ${VERSION} ${HTTP_BASE}
+
+# Layer schemas/reactome-${VERSION}.json onto an existing data image and
+# produce ${REG}/graphdb:${VERSION}-schema. Defaults to the public ECR
+# image as the base so no 4 GB local rebuild is required; override
+# SCHEMA_BASE to layer onto a locally-built reactome/graphdb:${VERSION}.
+#
+# Usage: make add-schema-to-image VERSION=Release96 \
+#            [SCHEMA_BASE=public.ecr.aws/reactome/graphdb]
+SCHEMA_BASE ?= public.ecr.aws/reactome/graphdb
+add-schema-to-image:
+	@test -f schemas/reactome-${VERSION}.json \
+		|| (echo "schemas/reactome-${VERSION}.json missing; run 'make extract-schema VERSION=${VERSION}' first" >&2; exit 1)
+	docker build \
+		-t ${REG}/graphdb:${VERSION}-schema \
+		-f Dockerfile_with_schema \
+		--build-arg VERSION=${VERSION} \
+		--build-arg SCHEMA_BASE=${SCHEMA_BASE} \
+		.
+	@echo ""
+	@echo "built ${REG}/graphdb:${VERSION}-schema — run it with:"
+	@echo "  docker run -p 7474:7474 -p 7687:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/graphdb:${VERSION}-schema"
+	@echo "verify the schema file with:"
+	@echo "  docker exec <container> ls -la /reactome-schema.json"

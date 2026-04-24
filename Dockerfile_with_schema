@@ -1,0 +1,30 @@
+# Layer the baked graph schema onto an already-built Reactome data image.
+# This lets clients (curator tooling, reactome-mcp, scripts) read the
+# schema directly from the image with `docker exec cat /reactome-schema.json`
+# instead of running apoc.meta.schema() at query time.
+#
+# Usage:
+#   make add-schema-to-image VERSION=Release96 \
+#       [SCHEMA_BASE=public.ecr.aws/reactome/graphdb]
+#
+# The SCHEMA_BASE arg defaults to the public ECR image so this works without
+# first rebuilding from the 4 GB reactome.graphdb.dump; override it to layer
+# onto a locally-built `reactome/graphdb:${VERSION}` instead.
+
+ARG SCHEMA_BASE=public.ecr.aws/reactome/graphdb
+# The build must override VERSION via --build-arg; the default here is a
+# placeholder that exists only so BuildKit does not flag an empty FROM tag.
+ARG VERSION=latest
+FROM ${SCHEMA_BASE}:${VERSION}
+
+# Re-declare inside the FROM stage so the COPY below can reference it.
+ARG VERSION=latest
+
+# The file is world-readable; permissions intentionally not restricted so
+# any client that can exec into the container can read the schema.
+COPY schemas/reactome-${VERSION}.json /reactome-schema.json
+
+# Tag the schema location in the container metadata so downstream tooling
+# can discover it without grepping filesystem.
+LABEL org.reactome.schema.path="/reactome-schema.json"
+LABEL org.reactome.schema.version="${VERSION}"
