@@ -38,3 +38,17 @@ bash:
 
 run:
 	docker run -p 7475:7474 -p 7688:7687 -e NEO4J_dbms_memory_heap_maxSize=8g ${REG}/graphdb:${VERSION}
+
+# Extract the graph schema (labels, relationship cardinalities, property
+# types, indexes, constraints) from a running Reactome Neo4j and write
+# schemas/reactome-${VERSION}.json. Consumed by reactome-mcp so that MCP
+# clients can get the schema without a live DB round-trip.
+#
+# Requires: a running container reachable on HTTP_BASE (default
+# http://localhost:7474) with auth disabled (default in this image), plus
+# curl and jq on the host.
+#
+# Usage: make extract-schema VERSION=Release96 [HTTP_BASE=http://localhost:7474]
+HTTP_BASE ?= http://localhost:7474
+extract-schema:
+	bin/extract-schema.sh ${VERSION} ${HTTP_BASE}

@@ -53,3 +53,26 @@ make run
 ### Making Queries
 
 Either go to Localhost:7474 and browse using the UI or use the bolt port within an application
+
+## Extracting the schema for reactome-mcp
+
+[`reactome-mcp`](https://github.com/reactome/reactome-mcp) consumes a baked JSON schema so MCP clients (Claude Code, Claude Desktop) can introspect the graph without a live DB round-trip. Regenerate the artifact whenever you build a new data image:
+
+```bash
+# 1. start the data image
+make run  # or: docker run -p 7474:7474 -p 7687:7687 <image>
+
+# 2. extract (requires curl + jq on the host)
+make extract-schema VERSION=<release>
+# writes schemas/reactome-<release>.json
+```
+
+The artifact captures:
+
+- `apoc.meta.schema()` — labels, relationship cardinalities, per-property types
+- `apoc.meta.stats()` — node / relationship counts per type
+- `apoc.meta.nodeTypeProperties()` / `apoc.meta.relTypeProperties()` — full per-label and per-rel property inventories with mandatory flags
+- `db.indexes()` / `db.constraints()` — current indexes and constraints
+- `dbms.components()` — Neo4j version metadata
+
+Commit the generated JSON alongside the release. `reactome-mcp` vendors a copy; refresh it there too when the schema changes.
