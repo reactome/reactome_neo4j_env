@@ -18,8 +18,8 @@ so clients that compare answers byte for byte should compare against the same da
 After a version has been created, the user should create a tagged docker container with the following command
 
 ```bash
-make all VERSION=<version>
-make push VERSION=<version>
+make create-data-image VERSION=<version>
+make push-to-dockerhub VERSION=<version>
 ```
 This will make it so that there is a graphdb_env container available via ECR (by default). If you would like to use this version feel free to specify the version in the add_data's Dockerfile or just use latest.   
 
@@ -49,7 +49,7 @@ make pull
 
 ### Make readonly container for production
 ```bash
-make create-data-image VERSION=<version>
+make create-readonly-image VERSION=<version>
 ```
 
 ## Running Bash inside container
